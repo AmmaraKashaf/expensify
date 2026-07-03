@@ -116,8 +116,6 @@ export function ReportsPage() {
                     <Progress
                       value={cat.percentage}
                       className="h-1.5"
-                      indicatorClassName="transition-all"
-                      style={{ "--tw-bg-opacity": "1" } as React.CSSProperties}
                     />
                   </div>
                 ))

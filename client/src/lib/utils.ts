@@ -39,7 +39,7 @@ export function getMonthRange(date = new Date()) {
 }
 
 export function useCurrency() {
-  const currency = useAuthStore((s) => s.user?.baseCurrency ?? "PKR");
+  const currency = useAuthStore((s) => s.user?.baseCurrency ?? "USD");
   return {
     currency,
     format: (amount: number) => formatCurrency(amount, currency),

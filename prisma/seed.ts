@@ -11,7 +11,7 @@ const DEFAULT_CATEGORIES = [
   { name: "Health & Fitness",  icon: "heart",         colorHex: "#10B981" },
   { name: "Education",         icon: "book",          colorHex: "#06B6D4" },
   { name: "Groceries",         icon: "shopping-cart", colorHex: "#84CC16" },
-  { name: "Rent & Housing",    icon: "home",          colorHex: "#1A1F36" },
+  { name: "Rent & Housing",    icon: "home",          colorHex: "#6366F1" },
   { name: "Travel",            icon: "plane",         colorHex: "#0EA5E9" },
   { name: "Gifts & Donations", icon: "gift",          colorHex: "#F59E0B" },
   { name: "Miscellaneous",     icon: "circle",        colorHex: "#6B7280" },
@@ -28,29 +28,26 @@ function daysAgo(n: number) {
 async function main() {
   console.log("Seeding default categories...");
 
-  // Upsert default categories
+  // Seed default categories (idempotent — skips if already exists by name)
   const categoryMap: Record<string, string> = {};
   for (const cat of DEFAULT_CATEGORIES) {
-    const c = await prisma.category.upsert({
-      where: { id: cat.name }, // won't match, triggers create
-      update: {},
-      create: { name: cat.name, icon: cat.icon, colorHex: cat.colorHex, isDefault: true },
-    }).catch(() =>
-      prisma.category.findFirst({ where: { name: cat.name, isDefault: true } }).then((c) => c!)
-    );
-    categoryMap[cat.name] = c.id;
+    const existing = await prisma.category.findFirst({ where: { name: cat.name, isDefault: true } });
+    if (existing) {
+      categoryMap[cat.name] = existing.id;
+    } else {
+      const created = await prisma.category.create({
+        data: { name: cat.name, icon: cat.icon, colorHex: cat.colorHex, isDefault: true },
+      });
+      categoryMap[cat.name] = created.id;
+    }
   }
-
-  // Re-fetch to ensure we have all IDs
-  const cats = await prisma.category.findMany({ where: { isDefault: true } });
-  for (const c of cats) categoryMap[c.name] = c.id;
 
   console.log("Creating demo user...");
   const demoUser = await prisma.user.upsert({
-    where: { email: "demo@wealthlens.app" },
+    where: { email: "demo@expensify.app" },
     update: {},
     create: {
-      email: "demo@wealthlens.app",
+      email: "demo@expensify.app",
       displayName: "Demo User",
       baseCurrency: "USD",
       themePreference: "system",
@@ -175,7 +172,7 @@ async function main() {
   }
 
   console.log(`Seeded ${txSeeds.length} demo transactions.`);
-  console.log("Done! Demo login: demo@wealthlens.app (use Supabase to create this user)");
+  console.log("Done! Demo login: demo@expensify.app (use Supabase to create this user)");
 }
 
 main()

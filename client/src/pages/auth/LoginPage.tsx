@@ -73,7 +73,7 @@ export function LoginPage() {
           <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center">
             <Wallet className="w-6 h-6 text-white" />
           </div>
-          <h1 className="text-2xl font-bold">Welcome to WealthLens</h1>
+          <h1 className="text-2xl font-bold">Welcome to Expensify</h1>
           <p className="text-muted-foreground text-sm">Your personal finance command center</p>
         </div>
 

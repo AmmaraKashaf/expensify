@@ -87,7 +87,7 @@ export function SettingsPage() {
         <CardContent className="space-y-3">
           <p className="text-sm text-muted-foreground">All amounts will be displayed in this currency.</p>
           <Select
-            value={user?.baseCurrency ?? "PKR"}
+            value={user?.baseCurrency ?? "USD"}
             onValueChange={(v) => !isDemo && updateCurrency.mutate(v)}
             disabled={isDemo || updateCurrency.isPending}
           >

@@ -1,5 +1,5 @@
 {
-  "name": "wealthlens-server",
+  "name": "expensify-server",
   "version": "1.0.0",
   "private": true,
   "main": "dist/index.js",

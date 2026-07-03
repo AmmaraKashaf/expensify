@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, TrendingUp, TrendingDown, Wallet, ArrowUpRight, ArrowDownRight, BarChart3 } from "lucide-react";
+import { Plus, TrendingUp, TrendingDown, Wallet, ArrowUpRight, ArrowDownRight, BarChart3, AlertTriangle } from "lucide-react";
 import {
   ResponsiveContainer, PieChart, Pie, Cell, Tooltip as ReTooltip,
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend
@@ -49,7 +49,7 @@ function SummaryCard({ label, value, icon: Icon, gradient, textColor }: {
 
 export function DashboardPage() {
   const { period, setPeriod } = useDashboardStore();
-  const { data, isLoading } = useDashboard();
+  const { data, isLoading, isError, refetch } = useDashboard();
   const { format, currency } = useCurrency();
   const { user, isDemo } = useAuthStore();
   const [formOpen, setFormOpen] = useState(false);
@@ -73,7 +73,26 @@ export function DashboardPage() {
     );
   }
 
-  const summary = data!;
+  if (isError || !data) {
+    return (
+      <div className="p-4 lg:p-6 flex flex-col items-center justify-center min-h-[60vh] text-center gap-4">
+        <div className="w-14 h-14 rounded-full bg-destructive/10 flex items-center justify-center">
+          <AlertTriangle className="w-7 h-7 text-destructive" />
+        </div>
+        <div>
+          <h2 className="text-lg font-semibold">Failed to load dashboard</h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            Could not connect to the server. Please check your connection and try again.
+          </p>
+        </div>
+        <Button onClick={() => refetch()} variant="outline">
+          Retry
+        </Button>
+      </div>
+    );
+  }
+
+  const summary = data;
   const netPositive = summary.netBalance >= 0;
 
   return (

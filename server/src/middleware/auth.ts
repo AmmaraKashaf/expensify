@@ -40,7 +40,7 @@ export async function requireAuth(req: AuthRequest, res: Response, next: NextFun
   // Demo token bypass — cache the demo user id after first lookup
   if (token === "demo") {
     if (!demoUserId) {
-      const demoUser = await prisma.user.findUnique({ where: { email: "demo@wealthlens.app" } });
+      const demoUser = await prisma.user.findUnique({ where: { email: "demo@expensify.app" } });
       if (!demoUser) {
         res.status(401).json({ error: "Demo user not found. Run the seed script first." });
         return;

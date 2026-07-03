@@ -17,7 +17,7 @@ export const useThemeStore = create<ThemeState>()(
       setPreference: (preference) => set({ preference }),
       setResolved: (resolved) => set({ resolved }),
     }),
-    { name: "wealthlens-theme" }
+    { name: "expensify-theme" }
   )
 );
 

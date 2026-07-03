@@ -19,6 +19,6 @@ export const useAuthStore = create<AuthState>()(
       setDemo: (isDemo) => set({ isDemo }),
       logout: () => set({ user: null, isDemo: false }),
     }),
-    { name: "wealthlens-auth" }
+    { name: "expensify-auth" }
   )
 );
