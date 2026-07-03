@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Wallet, Loader2 } from "lucide-react";
+import { Wallet, Loader2, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,23 +12,29 @@ import { supabase } from "@/lib/supabase";
 import { useAuthStore } from "@/store/authStore";
 import type { User } from "@/types";
 
-const schema = z.object({
-  email: z.string().email("Invalid email"),
+const loginSchema = z.object({
+  email: z.string().email("Invalid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
-type FormData = z.infer<typeof schema>;
+type LoginData = z.infer<typeof loginSchema>;
+
+const resetSchema = z.object({
+  email: z.string().email("Invalid email address"),
+});
+type ResetData = z.infer<typeof resetSchema>;
 
 export function LoginPage() {
   const navigate = useNavigate();
-  const { setUser, setDemo } = useAuthStore();
+  const { setUser } = useAuthStore();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [mode, setMode] = useState<"login" | "forgot">("login");
+  const [resetSent, setResetSent] = useState(false);
 
-  const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
-    resolver: zodResolver(schema),
-  });
+  const loginForm = useForm<LoginData>({ resolver: zodResolver(loginSchema) });
+  const resetForm = useForm<ResetData>({ resolver: zodResolver(resetSchema) });
 
-  async function onSubmit(data: FormData) {
+  async function onLogin(data: LoginData) {
     setLoading(true);
     setError("");
     const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
@@ -54,16 +60,30 @@ export function LoginPage() {
     setLoading(false);
   }
 
-  async function handleDemo() {
-    setDemo(true);
-    navigate("/");
+  async function onResetPassword(data: ResetData) {
+    setLoading(true);
+    setError("");
+    const { error: resetError } = await supabase.auth.resetPasswordForEmail(data.email, {
+      redirectTo: `${window.location.origin}/login`,
+    });
+    if (resetError) {
+      setError(resetError.message);
+    } else {
+      setResetSent(true);
+    }
+    setLoading(false);
   }
 
-  async function handleGoogleLogin() {
-    await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo: `${window.location.origin}/` },
-    });
+  function switchToForgot() {
+    setMode("forgot");
+    setError("");
+    setResetSent(false);
+  }
+
+  function switchToLogin() {
+    setMode("login");
+    setError("");
+    setResetSent(false);
   }
 
   return (
@@ -78,47 +98,106 @@ export function LoginPage() {
         </div>
 
         <Card>
-          <CardHeader>
-            <CardTitle>Sign in</CardTitle>
-            <CardDescription>Enter your credentials to access your account</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              <div className="space-y-1">
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" placeholder="you@example.com" {...register("email")} />
-                {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="password">Password</Label>
-                <Input id="password" type="password" placeholder="••••••••" {...register("password")} />
-                {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
-              </div>
-              {error && <p className="text-sm text-destructive">{error}</p>}
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-                Sign in
-              </Button>
-            </form>
-
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <Button variant="outline" onClick={handleGoogleLogin} type="button">
-                Google
-              </Button>
-              <Button variant="outline" onClick={handleDemo} type="button">
-                Try Demo
-              </Button>
-            </div>
-          </CardContent>
+          {mode === "login" ? (
+            <>
+              <CardHeader>
+                <CardTitle>Sign in</CardTitle>
+                <CardDescription>Enter your credentials to access your account</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <form onSubmit={loginForm.handleSubmit(onLogin)} className="space-y-4">
+                  <div className="space-y-1">
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="you@example.com"
+                      {...loginForm.register("email")}
+                    />
+                    {loginForm.formState.errors.email && (
+                      <p className="text-xs text-destructive">{loginForm.formState.errors.email.message}</p>
+                    )}
+                  </div>
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="password">Password</Label>
+                      <button
+                        type="button"
+                        onClick={switchToForgot}
+                        className="text-xs text-primary hover:underline"
+                      >
+                        Forgot password?
+                      </button>
+                    </div>
+                    <Input
+                      id="password"
+                      type="password"
+                      placeholder="••••••••"
+                      {...loginForm.register("password")}
+                    />
+                    {loginForm.formState.errors.password && (
+                      <p className="text-xs text-destructive">{loginForm.formState.errors.password.message}</p>
+                    )}
+                  </div>
+                  {error && <p className="text-sm text-destructive">{error}</p>}
+                  <Button type="submit" className="w-full" disabled={loading}>
+                    {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                    Sign in
+                  </Button>
+                </form>
+              </CardContent>
+            </>
+          ) : (
+            <>
+              <CardHeader>
+                <button
+                  type="button"
+                  onClick={switchToLogin}
+                  className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-1"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  Back to sign in
+                </button>
+                <CardTitle>Reset password</CardTitle>
+                <CardDescription>
+                  Enter your email and we&apos;ll send you a link to reset your password.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {resetSent ? (
+                  <div className="rounded-md bg-primary/10 border border-primary/20 p-4 text-sm text-center space-y-1">
+                    <p className="font-medium text-primary">Check your inbox</p>
+                    <p className="text-muted-foreground">
+                      A password reset link has been sent to{" "}
+                      <span className="font-medium text-foreground">
+                        {resetForm.getValues("email")}
+                      </span>
+                    </p>
+                  </div>
+                ) : (
+                  <form onSubmit={resetForm.handleSubmit(onResetPassword)} className="space-y-4">
+                    <div className="space-y-1">
+                      <Label htmlFor="reset-email">Email</Label>
+                      <Input
+                        id="reset-email"
+                        type="email"
+                        placeholder="you@example.com"
+                        {...resetForm.register("email")}
+                      />
+                      {resetForm.formState.errors.email && (
+                        <p className="text-xs text-destructive">{resetForm.formState.errors.email.message}</p>
+                      )}
+                    </div>
+                    {error && <p className="text-sm text-destructive">{error}</p>}
+                    <Button type="submit" className="w-full" disabled={loading}>
+                      {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                      Send reset link
+                    </Button>
+                  </form>
+                )}
+              </CardContent>
+            </>
+          )}
         </Card>
 
         <p className="text-center text-sm text-muted-foreground">
