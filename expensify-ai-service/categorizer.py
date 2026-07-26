@@ -1,12 +1,12 @@
 import os
-from langchain_openai import ChatOpenAI
+from langchain_groq import ChatGroq
 from langchain_core.prompts import ChatPromptTemplate
 from models import CategorizeRequest, CategorizedTransaction, ALL_CATEGORIES
 
-_llm = ChatOpenAI(
-    model="gpt-4o-mini",
+_llm = ChatGroq(
+    model="llama-3.1-8b-instant",
     temperature=0,
-    api_key=os.environ.get("OPENAI_API_KEY"),
+    api_key=os.environ.get("GROQ_API_KEY"),
 )
 
 _structured_llm = _llm.with_structured_output(CategorizedTransaction)
@@ -31,15 +31,13 @@ _chain = _prompt | _structured_llm
 
 
 def categorize(req: CategorizeRequest) -> CategorizedTransaction:
-    categories_str = ", ".join(ALL_CATEGORIES)
     result = _chain.invoke({
-        "categories": categories_str,
+        "categories": ", ".join(ALL_CATEGORIES),
         "description": req.description or "N/A",
         "merchant_name": req.merchant_name or "N/A",
         "amount": req.amount,
         "transaction_type": req.transaction_type,
     })
-    # Ensure the returned category is in the allowed list; fall back gracefully
     if result.category not in ALL_CATEGORIES:
         result.category = "Miscellaneous"
         result.confidence = max(0.0, result.confidence - 0.2)
