@@ -1,7 +1,7 @@
 import { NavLink } from "react-router-dom";
 import {
   LayoutDashboard, ArrowLeftRight, BarChart3, Settings, Wallet,
-  Target, CreditCard, Bell, Moon, Sun
+  Target, CreditCard, Bell, Moon, Sun, Brain
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ const navItems = [
   { to: "/goals", icon: Target, label: "Goals" },
   { to: "/subscriptions", icon: CreditCard, label: "Subscriptions" },
   { to: "/reminders", icon: Bell, label: "Reminders" },
+  { to: "/ai-insights", icon: Brain, label: "AI Insights" },
   { to: "/settings", icon: Settings, label: "Settings" },
 ];
 
