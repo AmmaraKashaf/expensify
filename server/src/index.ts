@@ -19,9 +19,13 @@ import budgetsRouter from "./routes/budgets";
 import goalsRouter from "./routes/goals";
 import subscriptionsRouter from "./routes/subscriptions";
 import remindersRouter from "./routes/reminders";
+import aiRouter from "./routes/ai";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+
+// Trust the first proxy (Nginx) so rate-limit and IP detection work correctly
+app.set("trust proxy", 1);
 
 // Allow a comma-separated list of origins (useful for multiple deployment URLs)
 const allowedOrigins = (process.env.CLIENT_URL || "http://localhost:5173")
@@ -58,6 +62,7 @@ app.use("/api/budgets", requireAuth, budgetsRouter);
 app.use("/api/goals", requireAuth, goalsRouter);
 app.use("/api/subscriptions", requireAuth, subscriptionsRouter);
 app.use("/api/reminders", requireAuth, remindersRouter);
+app.use("/api/ai", requireAuth, aiRouter);
 
 app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error(err);
