@@ -13,6 +13,7 @@ import { BudgetsPage } from "@/pages/budgets/BudgetsPage";
 import { GoalsPage } from "@/pages/goals/GoalsPage";
 import { SubscriptionsPage } from "@/pages/subscriptions/SubscriptionsPage";
 import { RemindersPage } from "@/pages/reminders/RemindersPage";
+import { AIInsightsPage } from "@/pages/ai/AIInsightsPage";
 import { useThemeStore, applyTheme } from "@/store/themeStore";
 
 const queryClient = new QueryClient({
@@ -54,6 +55,7 @@ export default function App() {
               <Route path="/subscriptions" element={<SubscriptionsPage />} />
               <Route path="/reminders" element={<RemindersPage />} />
               <Route path="/settings" element={<SettingsPage />} />
+              <Route path="/ai-insights" element={<AIInsightsPage />} />
             </Route>
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
