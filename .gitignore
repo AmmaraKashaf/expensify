@@ -2,15 +2,21 @@ node_modules/
 dist/
 build/
 
-# Environment files (never commit these)
+# Environment files — never commit any of these
 .env
+.env.*
 .env.local
 .env.*.local
 server/.env
 client/.env.local
+expensify-ai-service/.env
+**/.env
+**/.env.*
 
 *.log
 .DS_Store
 Thumbs.db
 .prisma/
 prisma/migrations/
+expensify-ai-service/__pycache__/
+expensify-ai-service/venv/
