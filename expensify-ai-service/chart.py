@@ -1,12 +1,14 @@
 import io
 import base64
-import numpy as np
-import matplotlib
-import matplotlib.pyplot as plt
-import seaborn as sns
 from models import CategorySummary
 
-matplotlib.use("Agg")  # non-interactive backend — must be before any plt import
+
+def _pyplot():
+    """Import matplotlib on first chart only, so the service starts small."""
+    import matplotlib
+    matplotlib.use("Agg")  # non-interactive backend — must be before the pyplot import
+    import matplotlib.pyplot as plt
+    return plt
 
 # Consistent palette matching Expensify brand colours
 _PALETTE = [
@@ -25,6 +27,7 @@ def spending_bar_chart(by_category: list[CategorySummary], month: str) -> str:
     values = [s.total for s in by_category]
     colours = _PALETTE[:len(labels)]
 
+    plt = _pyplot()
     fig, ax = plt.subplots(figsize=(9, 5))
     fig.patch.set_facecolor("#0f172a")
     ax.set_facecolor("#1e293b")
@@ -52,7 +55,7 @@ def spending_bar_chart(by_category: list[CategorySummary], month: str) -> str:
         spine.set_visible(False)
 
     plt.tight_layout()
-    return _fig_to_base64(fig)
+    return _fig_to_base64(plt, fig)
 
 
 def spending_trend_chart(dates: list[str], amounts: list[float], month: str) -> str:
@@ -60,6 +63,8 @@ def spending_trend_chart(dates: list[str], amounts: list[float], month: str) -> 
     if not dates:
         return ""
 
+    import numpy as np
+    plt = _pyplot()
     fig, ax = plt.subplots(figsize=(9, 4))
     fig.patch.set_facecolor("#0f172a")
     ax.set_facecolor("#1e293b")
@@ -88,10 +93,10 @@ def spending_trend_chart(dates: list[str], amounts: list[float], month: str) -> 
     ax.set_xticks(ax.get_xticks()[::step])
     plt.xticks(rotation=30, ha="right")
     plt.tight_layout()
-    return _fig_to_base64(fig)
+    return _fig_to_base64(plt, fig)
 
 
-def _fig_to_base64(fig: plt.Figure) -> str:
+def _fig_to_base64(plt, fig) -> str:
     buf = io.BytesIO()
     fig.savefig(buf, format="png", dpi=130, bbox_inches="tight")
     plt.close(fig)

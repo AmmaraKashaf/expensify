@@ -8,7 +8,6 @@ import os
 from datetime import date, timedelta
 from typing import Optional
 
-import numpy as np
 import pandas as pd
 from fastapi import FastAPI, HTTPException, Header
 from fastapi.middleware.cors import CORSMiddleware

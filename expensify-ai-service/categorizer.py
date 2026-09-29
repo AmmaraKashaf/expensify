@@ -1,13 +1,8 @@
-import os
-from langchain_groq import ChatGroq
 from langchain_core.prompts import ChatPromptTemplate
+from llm import chat_model
 from models import CategorizeRequest, CategorizedTransaction, ALL_CATEGORIES
 
-_llm = ChatGroq(
-    model="llama-3.1-8b-instant",
-    temperature=0,
-    api_key=os.environ.get("GROQ_API_KEY"),
-)
+_llm = chat_model(temperature=0)
 
 _structured_llm = _llm.with_structured_output(CategorizedTransaction)
 

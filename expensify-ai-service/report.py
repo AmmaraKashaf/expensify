@@ -1,16 +1,11 @@
-import os
 import pandas as pd
 from sqlalchemy import text
-from langchain_groq import ChatGroq
 from langchain_core.prompts import ChatPromptTemplate
+from llm import chat_model
 from db import engine
 from models import CategorySummary, ReportResponse
 
-_llm = ChatGroq(
-    model="llama-3.1-8b-instant",
-    temperature=0.4,
-    api_key=os.environ.get("GROQ_API_KEY"),
-)
+_llm = chat_model(temperature=0.4)
 
 _narrative_prompt = ChatPromptTemplate.from_messages([
     ("system", (
